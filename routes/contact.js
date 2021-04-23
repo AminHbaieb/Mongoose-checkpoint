@@ -2,31 +2,43 @@ const express =require('express')
 const router=express.router()
 const Contact=require('..models/Contact')
  
-//here we test 
-router.get('/test',(req,res)=>{ //  /api/contacts/test in the browser
+//here we test the route
+router.get('/test',(req,res)=>{ //  /api/contacts/test in the browser or in the postman
     res.send('the route is working')
 })
 
-router.post('/',async(req,res)=>{
+// arrayOfPeople 
+let arrayOfPeople =[{
+        name: 'Akram',
+        age: 15,
+        email: 'akram@gmail.com',
+        favoriteFoods: ['rouz', 'kouskous', 'lablabi']
+    }, {
+        name: 'Amin',
+        age: 24,
+        email: 'amin@gmail.com',
+        favoriteFoods: ['sushi', 'creppe', 'pizza']
+    }, {
+        name: 'Rim',
+        age: 15,
+        email: 'rim@gmail.com',
+        favoriteFoods: ['loubia', 'lazania', 'salade']
+    }];
+
+//Create a collection on the DB with model.create():
+model.create(arrayOfPeople,(err, data) => {
     try {
-        const {name,age,email,number,favoriteFood}=req.body
-        if(!name||!email){
-            return res.status(400).send("name and email are required")
-        }
-        const contactUniq=await Contact.findOne({email})
-        if (contactUniq){
-            return res.status(400).send("Contact already exist")
-        }
-        const contact=new Contact=new Contact({
-            name,age,email,number,favoriteFood
-        })
-        await contact.save()
+        console.log("collection is created :", data)
     } catch (error) {
-        res.status(500).send("impossible to add contact")
+        res.status(500).send({msg:"collection coudn't be created ",error})
     }
 })
-//Find person by name :
-router.post('/',async(req,res)=>{
+
+
+
+
+//Find all persons  :
+router.get('/',async(req,res)=>{
     try {
         const contacts=await Contact.find()
         res.status(200).send({msg:"contact is find",contacts})
@@ -34,18 +46,41 @@ router.post('/',async(req,res)=>{
         res.status(500).send("impossible to find contact")
     }
 })
-     //Find person by name :
-     router.post('/:amin',async(req,res)=>{
+     //Find person by food :
+     router.get('/:salade',async(req,res)=>{
     try {
-        const {amin}=req.params
-        const contact=await Contact.findOne({_id:amin})
+        const {salade}=req.params
+        const contact=await Contact.findOne({_id:salade})
         res.status(200).send({msg:"contact is find",contact})
     } catch (error) {
         res.status(500).send("impossible to find contact")
     }
 })
-    //Find person by _id then edit :
-    router.post('/:Id',async(req,res)=>{
+
+//Find person by name :
+     router.get('/:Id',async(req,res)=>{
+    try {
+        const {Id}=req.params
+        const contact=await Contact.findOne({_id:Id})
+        res.status(200).send({msg:"contact is find",contact})
+    } catch (error) {
+        res.status(500).send("impossible to find contact")
+    }
+})
+    
+//Find person by _id then edit :
+    router.put('/:amin',async(req,res)=>{
+    try {
+        const{amin}=req.params
+        const contact=await Contact.findOneAndUpdate({_id:amin},{$set:{...req.body}})
+        res.status(200).send({msg:"contact is find and updated",contact})
+    } catch (error) {
+        res.status(500).send("impossible to find contact")
+    }
+})
+
+//Find person by _id then edit :
+    router.put('/:Id',async(req,res)=>{
     try {
         const{Id}=req.params
         const contact=await Contact.findOneAndUpdate({_id:Id},{$set:{...req.body}})
@@ -54,8 +89,8 @@ router.post('/',async(req,res)=>{
         res.status(500).send("impossible to find contact")
     }
 })
-    //Find person and then update :
-    router.post('/:amin',async(req,res)=>{
+    //Find person and then remove it :
+    router.delete('/:amin',async(req,res)=>{
     try {
         const{amin}=req.params
         const contact=await Contact.findByIdAndDelete({_id:amin},{$set:{...req.body}})
@@ -65,7 +100,7 @@ router.post('/',async(req,res)=>{
     }
 })
     //Find person by _id and remove it :
-    router.post('/:Id',async(req,res)=>{
+    router.delete('/:Id',async(req,res)=>{
     try {
         const{Id}=req.params
         const contact=await Contact.findByIdAndDelete(Id)
